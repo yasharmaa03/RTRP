@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart Citizen Complaint Analyzer - AI-powered complaint classification and priority system for smart city governance.">
+    <title>Smart Citizen Complaint Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Chart.js for statistics charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+    <!-- ─── Header ─────────────────────────────────────────────────────── -->
+    <header class="app-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-icon">🏛️</div>
+                <div>
+                    <h1>Smart Citizen Complaint Analyzer</h1>
+                    <p class="tagline">AI-Powered Complaint Classification & Priority System</p>
+                </div>
+            </div>
+            <div class="header-stats" id="headerStats">
+                <div class="stat-pill">
+                    <span class="stat-label">Total</span>
+                    <span class="stat-value" id="totalBadge">0</span>
+                </div>
+                <div class="stat-pill high">
+                    <span class="stat-label">High</span>
+                    <span class="stat-value" id="highBadge">0</span>
+                </div>
+                <div class="stat-pill medium">
+                    <span class="stat-label">Medium</span>
+                    <span class="stat-value" id="mediumBadge">0</span>
+                </div>
+                <div class="stat-pill low">
+                    <span class="stat-label">Low</span>
+                    <span class="stat-value" id="lowBadge">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- ─── Complaint Submission Section ─────────────────────────── -->
+        <section class="card submit-card" id="submitSection">
+            <div class="card-header">
+                <h2>📝 Submit a Complaint</h2>
+                <p>Enter your complaint below or use voice input</p>
+            </div>
+            <form id="complaintForm" class="complaint-form">
+                <div class="form-group">
+                    <label for="complaintText">Complaint Description</label>
+                    <textarea
+                        id="complaintText"
+                        name="complaintText"
+                        rows="4"
+                        placeholder="Describe your complaint in detail... (e.g., 'There is a major pothole on Main Street causing accidents')"
+                        required
+                    ></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="voiceBtn" class="btn btn-voice" title="Record voice input">
+                        <span class="btn-icon">🎤</span>
+                        <span class="btn-text">Voice Input</span>
+                    </button>
+                    <button type="submit" id="submitBtn" class="btn btn-submit">
+                        <span class="btn-icon">🚀</span>
+                        <span class="btn-text">Submit Complaint</span>
+                    </button>
+                </div>
+                <div id="voiceStatus" class="voice-status hidden">
+                    <div class="recording-indicator">
+                        <span class="recording-dot"></span>
+                        <span>Recording... Click again to stop</span>
+                    </div>
+                </div>
+                <div id="submitResult" class="submit-result hidden"></div>
+            </form>
+        </section>
+
+        <!-- ─── Statistics Section ───────────────────────────────────── -->
+        <section class="card stats-card" id="statsSection">
+            <div class="card-header">
+                <h2>📊 Statistics Dashboard</h2>
+                <p>Real-time analytics of citizen complaints</p>
+            </div>
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h3>Category Distribution</h3>
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Priority Distribution</h3>
+                    <canvas id="priorityChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── Complaints Dashboard ─────────────────────────────────── -->
+        <section class="card dashboard-card" id="dashboardSection">
+            <div class="card-header">
+                <h2>📋 Complaints Dashboard</h2>
+                <p>View and filter all submitted complaints</p>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <label for="filterCategory">Category</label>
+                    <select id="filterCategory">
+                        <option value="">All Categories</option>
+                        <option value="Water Issue">💧 Water Issue</option>
+                        <option value="Electricity Issue">⚡ Electricity Issue</option>
+                        <option value="Road Issue">🛣️ Road Issue</option>
+                        <option value="Sanitation Issue">🗑️ Sanitation Issue</option>
+                        <option value="Traffic Issue">🚦 Traffic Issue</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterPriority">Priority</label>
+                    <select id="filterPriority">
+                        <option value="">All Priorities</option>
+                        <option value="High">🔴 High</option>
+                        <option value="Medium">🟡 Medium</option>
+                        <option value="Low">🟢 Low</option>
+                    </select>
+                </div>
+                <button class="btn btn-refresh" id="refreshBtn" title="Refresh data">
+                    <span>🔄</span> Refresh
+                </button>
+            </div>
+
+            <!-- Complaints Table -->
+            <div class="table-wrapper">
+                <table id="complaintsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Complaint</th>
+                            <th>Category</th>
+                            <th>Priority</th>
+                            <th>Score</th>
+                            <th>Sentiment</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="complaintsBody">
+                        <tr class="empty-row">
+                            <td colspan="7">No complaints yet. Submit one above!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <p>Smart Citizen Complaint Analyzer &mdash; Built with FastAPI, scikit-learn &amp; Chart.js</p>
+    </footer>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

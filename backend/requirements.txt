@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+sqlalchemy
+textblob
+scikit-learn
+SpeechRecognition
+python-multipart
+pydub
