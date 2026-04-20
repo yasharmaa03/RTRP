@@ -104,7 +104,7 @@ def calculate_priority(text: str, category: str, sentiment: float, db=None) -> d
     total = round(urgency + frequency + sentiment_score, 2)
 
     # Map to label
-    if total >= 7:
+    if total >= 6.5:
         label = "High"
     elif total >= 4:
         label = "Medium"

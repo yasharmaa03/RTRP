@@ -6,3 +6,5 @@ scikit-learn
 SpeechRecognition
 python-multipart
 pydub
+pyjwt
+passlib[bcrypt]
