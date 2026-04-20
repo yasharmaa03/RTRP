@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Login to the Smart Citizen Complaint Analyzer — AI-powered complaint classification and priority system.">
+    <title>Login — Smart Citizen Complaint Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="login-card">
+            <!-- Logo -->
+            <div class="login-logo">
+                <div class="logo-icon">🏛️</div>
+                <h1>Smart Citizen Complaint Analyzer</h1>
+                <p id="loginSubtitle">Sign in to your account</p>
+            </div>
+
+            <!-- Error message -->
+            <div id="loginError" class="login-error hidden"></div>
+
+            <!-- Login / Register Form -->
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+                </div>
+                <button type="submit" id="loginBtn" class="btn btn-submit">
+                    <span class="btn-icon">🔐</span>
+                    <span class="btn-text" id="loginBtnText">Sign In</span>
+                </button>
+            </form>
+
+            <!-- Toggle login/register -->
+            <div class="login-toggle">
+                <span id="toggleText">Don't have an account?</span>
+                <a id="toggleLink" onclick="toggleMode()">Create one</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        let isRegisterMode = false;
+
+        // Check if already logged in
+        const token = localStorage.getItem("token");
+        const role = localStorage.getItem("role");
+        if (token && role) {
+            window.location.href = role === "admin" ? "/admin" : "/user";
+        }
+
+        // Toggle between login and register
+        function toggleMode() {
+            isRegisterMode = !isRegisterMode;
+            const subtitle = document.getElementById("loginSubtitle");
+            const btnText = document.getElementById("loginBtnText");
+            const toggleText = document.getElementById("toggleText");
+            const toggleLink = document.getElementById("toggleLink");
+            const passwordInput = document.getElementById("password");
+
+            if (isRegisterMode) {
+                subtitle.textContent = "Create a new citizen account";
+                btnText.textContent = "Create Account";
+                toggleText.textContent = "Already have an account?";
+                toggleLink.textContent = "Sign in";
+                passwordInput.setAttribute("autocomplete", "new-password");
+            } else {
+                subtitle.textContent = "Sign in to your account";
+                btnText.textContent = "Sign In";
+                toggleText.textContent = "Don't have an account?";
+                toggleLink.textContent = "Create one";
+                passwordInput.setAttribute("autocomplete", "current-password");
+            }
+
+            // Clear error
+            document.getElementById("loginError").classList.add("hidden");
+        }
+
+        // Handle form submission
+        document.getElementById("loginForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value;
+            const btn = document.getElementById("loginBtn");
+            const btnText = document.getElementById("loginBtnText");
+            const errorEl = document.getElementById("loginError");
+
+            if (!username || !password) {
+                errorEl.textContent = "Please fill in all fields.";
+                errorEl.classList.remove("hidden");
+                return;
+            }
+
+            btn.disabled = true;
+            btnText.textContent = isRegisterMode ? "Creating..." : "Signing in...";
+            errorEl.classList.add("hidden");
+
+            try {
+                const endpoint = isRegisterMode ? "/register" : "/login";
+                const formData = new FormData();
+                formData.append("username", username);
+                formData.append("password", password);
+
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    method: "POST",
+                    body: formData,
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === "success") {
+                    // Store token and user info
+                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("username", data.user.username);
+                    localStorage.setItem("role", data.user.role);
+
+                    // Redirect based on role
+                    if (data.user.role === "admin") {
+                        window.location.href = "/admin";
+                    } else {
+                        window.location.href = "/user";
+                    }
+                } else {
+                    errorEl.textContent = data.detail || "Authentication failed.";
+                    errorEl.classList.remove("hidden");
+                }
+            } catch (err) {
+                errorEl.textContent = "Connection error. Please try again.";
+                errorEl.classList.remove("hidden");
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = isRegisterMode ? "Create Account" : "Sign In";
+            }
+        });
+    </script>
+</body>
+</html>

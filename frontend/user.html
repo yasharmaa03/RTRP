@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Submit your complaint — Smart Citizen Complaint Analyzer.">
+    <title>Citizen Portal — Smart Citizen Complaint Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <!-- ─── Header ─────────────────────────────────────────────────────── -->
+    <header class="app-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-icon">🏛️</div>
+                <div>
+                    <h1>Citizen Portal</h1>
+                    <p class="tagline">Submit & track your complaints</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <div>
+                        <div class="user-name" id="userName">User</div>
+                        <div class="user-role">Citizen</div>
+                    </div>
+                </div>
+                <button class="btn-logout" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- ─── Complaint Submission Section ─────────────────────────── -->
+        <section class="card submit-card" id="submitSection">
+            <div class="card-header">
+                <h2>📝 Submit a Complaint</h2>
+                <p>Enter your complaint below or use voice input</p>
+            </div>
+            <form id="complaintForm" class="complaint-form">
+                <div class="form-group">
+                    <label for="complaintText">Complaint Description</label>
+                    <textarea
+                        id="complaintText"
+                        name="complaintText"
+                        rows="4"
+                        placeholder="Describe your complaint in detail... (e.g., 'There is a major pothole on Main Street causing accidents')"
+                        required
+                    ></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="voiceBtn" class="btn btn-voice" title="Record voice input">
+                        <span class="btn-icon">🎤</span>
+                        <span class="btn-text">Voice Input</span>
+                    </button>
+                    <button type="submit" id="submitBtn" class="btn btn-submit">
+                        <span class="btn-icon">🚀</span>
+                        <span class="btn-text">Submit Complaint</span>
+                    </button>
+                </div>
+                <div id="voiceStatus" class="voice-status hidden">
+                    <div class="recording-indicator">
+                        <span class="recording-dot"></span>
+                        <span>Recording... Click again to stop</span>
+                    </div>
+                </div>
+                <div id="submitResult" class="submit-result hidden"></div>
+            </form>
+        </section>
+
+        <!-- ─── My Recent Complaints ──────────────────────────────────── -->
+        <section class="card recent-card" id="recentSection">
+            <div class="card-header">
+                <h2>📋 My Recent Complaints</h2>
+                <p>Your latest submitted complaints and their status</p>
+            </div>
+            <div id="recentList" class="recent-list">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <div class="empty-state-text">No complaints yet. Submit one above!</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <p>Smart Citizen Complaint Analyzer &mdash; Built with FastAPI, scikit-learn &amp; AI</p>
+    </footer>
+
+    <script src="/static/user.js"></script>
+</body>
+</html>
