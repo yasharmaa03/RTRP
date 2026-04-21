@@ -34,11 +34,28 @@ from typing import Optional
 import jwt
 import bcrypt
 
+from deep_translator import GoogleTranslator
+
 from database import engine, get_db, Base
 from models import Complaint, User
 from nlp_processor import nlp
 from priority import calculate_priority
 from speech import speech_to_text
+
+# Language codes for translation
+LANG_MAP = {"en": "en", "hi": "hi", "te": "te"}
+
+
+def translate_to_english(text: str, source_lang: str) -> str:
+    """Translate text from source language to English using Google Translate."""
+    if source_lang == "en":
+        return text
+    try:
+        translated = GoogleTranslator(source=source_lang, target="en").translate(text)
+        return translated or text
+    except Exception:
+        # If translation fails, return original text
+        return text
 
 # ─── Configuration ───────────────────────────────────────────────────────────
 JWT_SECRET = "smart-citizen-complaint-analyzer-secret-key-2024"
@@ -241,6 +258,7 @@ async def get_me(user: User = Depends(get_current_user)):
 async def submit_complaint(
     text: Optional[str] = Form(None),
     audio: Optional[UploadFile] = File(None),
+    language: Optional[str] = Form("en"),
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -255,7 +273,7 @@ async def submit_complaint(
     if audio and not complaint_text:
         try:
             audio_bytes = await audio.read()
-            complaint_text = speech_to_text(audio_bytes, audio.filename)
+            complaint_text = speech_to_text(audio_bytes, audio.filename, language=language or "en")
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e))
         except RuntimeError as e:
@@ -264,9 +282,13 @@ async def submit_complaint(
     if not complaint_text or not complaint_text.strip():
         raise HTTPException(status_code=400, detail="Please provide complaint text or an audio file.")
 
-    complaint_text = complaint_text.strip()
+    original_text = complaint_text.strip()
 
-    # Step 1: NLP Processing — classify and get sentiment
+    # Translate to English if complaint is in another language
+    src_lang = LANG_MAP.get(language or "en", "en")
+    complaint_text = translate_to_english(original_text, src_lang)
+
+    # Step 1: NLP Processing — classify and get sentiment (on English text)
     nlp_result = nlp.process(complaint_text)
 
     # Step 2: Priority Scoring
@@ -390,15 +412,16 @@ async def analyze(
 @app.post("/speech_to_text")
 async def convert_speech(
     audio: UploadFile = File(...),
+    language: str = Form("en"),
     user: User = Depends(get_current_user),
 ):
     """
     Convert an uploaded audio file to text using speech recognition.
-    Returns the transcribed text.
+    Supports: en (English), hi (Hindi), te (Telugu).
     """
     try:
         audio_bytes = await audio.read()
-        text = speech_to_text(audio_bytes, audio.filename)
+        text = speech_to_text(audio_bytes, audio.filename, language=language)
         return {"status": "success", "text": text}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

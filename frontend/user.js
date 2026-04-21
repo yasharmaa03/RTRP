@@ -98,8 +98,10 @@ async function handleSubmit(e) {
     submitBtn.querySelector(".btn-text").textContent = "Analyzing...";
 
     try {
+        const language = document.getElementById("voiceLanguage").value;
         const formData = new FormData();
         formData.append("text", text);
+        formData.append("language", language);
 
         const response = await fetch(`${API_BASE}/submit_complaint`, {
             method: "POST",
@@ -200,8 +202,10 @@ async function transcribeAudio(audioBlob) {
     voiceBtn.querySelector(".btn-text").textContent = "Transcribing...";
 
     try {
+        const language = document.getElementById("voiceLanguage").value;
         const formData = new FormData();
         formData.append("audio", audioBlob, "recording.webm");
+        formData.append("language", language);
 
         const response = await fetch(`${API_BASE}/speech_to_text`, {
             method: "POST",

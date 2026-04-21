@@ -20,13 +20,23 @@ def convert_audio_to_wav(input_path: str) -> str:
     return wav_path
 
 
-def speech_to_text(audio_bytes: bytes, filename: str = "audio.webm") -> str:
+
+# Supported languages for Google Speech Recognition
+LANGUAGE_CODES = {
+    "en": "en-IN",   # English (India)
+    "hi": "hi-IN",   # Hindi
+    "te": "te-IN",   # Telugu
+}
+
+
+def speech_to_text(audio_bytes: bytes, filename: str = "audio.webm", language: str = "en") -> str:
     """
     Convert audio bytes to text.
 
     Args:
         audio_bytes: Raw audio file bytes
         filename: Original filename (used to determine format)
+        language: Language code — "en" (English), "hi" (Hindi), or "te" (Telugu)
 
     Returns:
         Transcribed text string
@@ -36,6 +46,7 @@ def speech_to_text(audio_bytes: bytes, filename: str = "audio.webm") -> str:
         RuntimeError: If the speech recognition service is unavailable
     """
     recognizer = sr.Recognizer()
+    lang_code = LANGUAGE_CODES.get(language, "en-IN")
 
     # Save bytes to a temporary file
     suffix = os.path.splitext(filename)[1] or ".webm"
@@ -50,11 +61,11 @@ def speech_to_text(audio_bytes: bytes, filename: str = "audio.webm") -> str:
             os.unlink(tmp_path)  # Remove original temp file
             tmp_path = wav_path
 
-        # Perform speech recognition
+        # Perform speech recognition in the selected language
         with sr.AudioFile(tmp_path) as source:
             audio_data = recognizer.record(source)
 
-        text = recognizer.recognize_google(audio_data)
+        text = recognizer.recognize_google(audio_data, language=lang_code)
         return text
 
     except sr.UnknownValueError:
